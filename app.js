@@ -3,7 +3,6 @@
 var express = require('express');
 var bodyParser =  require('body-parser');
 var userRoute = require('./routes/user.route');
-
 var app = express();
 
 app.use(bodyParser.urlencoded({extended: false}));
@@ -18,5 +17,4 @@ app.use((req, res, next) => {
 });
 
 app.use('/v1', userRoute);
-
 module.exports = app;
