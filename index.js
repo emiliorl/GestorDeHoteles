@@ -3,7 +3,7 @@
 var mongoose = require('mongoose');
 var app = require('./App')
 var port = 3200;
-var adminInit = require('./controllers/user.controller')
+var adminInit = require('./controllers/user.controller');
 
 mongoose.Promise = global.Promise;
 mongoose.set('useFindAndModify', false);
