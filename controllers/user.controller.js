@@ -90,6 +90,98 @@ function signIn(req, res){
     }
 }
 
+function updateUser(req, res){
+    let userId = req.params.id;
+    let update = req.body;
+
+    if(userId != req.user.sub){
+        return res.status(404).send({message:'No tienes permiso para actualizar esta cuenta'});
+    }else{
+        if(update.password){
+            return res.status(404).send({message:'No se puede actualizar la password'});
+        }else{
+            if(update.username){
+                User.findOne({username: update.username.toLowerCase()}, (err, userFind) => {
+                    if(err){
+                        return res.status(500).send({message:'Error al buscar usuario'});
+                    }else if(userFind){
+                        if(userFind._id == req.user.sub){
+                            User.findByIdAndUpdate(userId, update, {new: true}, (err, userUpdated)=>{
+                                if(err){
+                                    return res.status(500).send({message: 'Error general al actualizar'});
+                                }else if(userUpdated){
+                                    return res.send({message: 'Usuario actualizado', userUpdated});
+                                }else{
+                                    return res.send({message: 'No se pudo actualizar al usuario'});
+                                }
+                            })
+                        }else{
+                            return res.send({message: 'Nombre de usuario ya en uso'});
+                        }
+                    }else{
+                        User.findByIdAndUpdate(userId, update, {new: true}, (err, userUpdate) => {
+                            if(err){
+                                return res.status(500).send({message:'Error al intentar actualizar'});
+                            }else if(userUpdate){
+                                return res.send({message:'Usuario actualizado', userUpdate});
+                            }else{
+                                return res.status(500).send({message:'No se puede actualizar'});
+                            }
+                        });                
+                    }
+                })
+            }else if(update.rol){
+                return res.status(404).send({message: 'No puedes actualizar tu rol'});
+            }else{
+                User.findByIdAndUpdate(userId, update, {new: true}, (err, userUpdate) => {
+                    if(err){
+                        return res.status(500).send({message:'Error al intentar actualizar'});
+                    }else if(userUpdate){
+                        return res.send({message:'Usuario actualizado', userUpdate});
+                    }else{
+                        return res.status(500).send({message:'No se puede actualizar'});
+                    }
+                })
+            }
+        }
+    }        
+}
+
+function removeUser(req, res){
+    let userId = req.params.id;
+    let params = req.body;
+
+    if(userId != req.user.sub){
+        return res.status(401).send({message:'No tienes permiso para eliminar'});
+    }else{
+        User.findOne({_id: userId}, (err, userFind) => {
+            if(err){
+                return res.status(500).send({message:'Error al buscar usuario'});
+            }else if(userFind){
+                bcrypt.compare(params.password, userFind.password, (err, checkPas) => {
+                    if(err){
+                        return res.status(500).send({message:'Error al buscar password, no olvides colocar la contraseña'});
+                    }else if(checkPas){
+                        User.findByIdAndRemove(userId, (err, userRemoved) => {
+                            if(err){
+                                return res.status(500).send({message:'Error al buscar usuario'});
+                            }else if(userRemoved){
+                                return res.send({message: 'Usuario eliminado', userRemoved});
+                            }else{
+                                return res.status(404).send({message:'No se pudo eliminar al usuario o ya no fue eliminado'});
+                            }
+                        })
+                    }else{
+                        return res.status(500).send({message:'Password incorrecta'});
+                    }
+                })
+            }else{
+                return res.status(404).send({message:'El usuario no existe'});
+            }
+        })        
+    }
+}
+
 //---------------------------------------
 
 function logIn(req, res){
@@ -142,6 +234,69 @@ function listUser(req, res){
     }
 }
 
+function creatUserAdmin_Hotel(req, res){
+    var userId = req.params.id;
+    var user = new User();
+    var params = req.body;
+
+    if(userId != req.user.sub){
+        return res.status(404).send({message:'No tienes permiso para realizar esta accion'});
+    }else{
+        if(params.name && params.lastname && params.username && params.phone && params.email && params.password && params.passwordAdmin){
+            User.findOne({username: params.username.toLowerCase()}, (err, userFind) => {
+                if(err){
+                    return res.status(500).send({message:'Error al buscar al usuario'});
+                }else if(userFind){
+                    return res.send({message:'Nombre de usuario ya existente, por favor elije otro'});
+                }else{
+                    bcrypt.hash(params.password, null, null, (err, passwordHash) => {
+                        if(err){
+                            return res.status(500).send({message:'Error al encriptar la contraseña'});
+                        }else if(passwordHash){
+                            User.findOne({_id: userId}, (err, userFind) => {
+                                if(err){
+                                    return res.status(500).send({message:'Error al buscar usuario'});
+                                }else if(userFind){
+                                    bcrypt.compare(params.passwordAdmin, userFind.password, (err, checkPas) => {
+                                        if(err){
+                                            return res.status(500).send({message:'Error al buscar password, no olvides colocar la contraseña'});
+                                        }else if(checkPas){
+                                            user.password = passwordHash;
+                                            user.name = params.name;
+                                            user.lastname = params.lastname;
+                                            user.username = params.username.toLowerCase();
+                                            user.rol = "ADMIN_HOTEL";
+                                            user.phone = params.phone; 
+                                            user.email = params.email;
+                
+                                            user.save((err, userSaved) => {
+                                                if(err){
+                                                    return res.status(500).send({message:'Error al intentar guardar'});
+                                                }else if(userSaved){
+                                                    return res.send({message:'Se ha creado exitosamente el administrador del hotel', userSaved});
+                                                }else{
+                                                    return res.status(401).send({message:'No se guardo el administrador del hotel'});
+                                                }
+                                            })
+                                        }else{
+                                            return res.status(500).send({message:'Password incorrecta'});
+                                        }
+                                    })
+                                }else{
+                                    return res.status(404).send({message:'El usuario no existe'});
+                                }
+                            })
+                        }else{
+                            return res.status(401).send({message:'Password no encriptada'});
+                        }
+                    })
+                }
+            })
+        }else{
+            return res.send({message:'Ingresa todos los parametros minimos, no olvides colocar la password del admin >passwordAdmin<'});
+        }
+    }
+}
 //---------------------------------------
 
 
@@ -155,5 +310,8 @@ module.exports = {
     signIn,
     adminInit,
     logIn,
-    listUser
+    listUser,
+    updateUser,
+    removeUser,
+    creatUserAdmin_Hotel
 }
