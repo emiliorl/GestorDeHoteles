@@ -13,7 +13,7 @@ var userSchema = Schema({
     password: String,
     image: String,
     profilePicture: String,
-    userHistory: [{type: Schema.ObjectId, ref: 'userHistory'}]
+    receipts: [{type: Schema.ObjectId, ref: 'receipt'}]
 });
 
 module.exports = mongoose.model('user', userSchema);
