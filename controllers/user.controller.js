@@ -168,7 +168,7 @@ function removeUser(req, res){
                             }else if(userRemoved){
                                 return res.send({message: 'Usuario eliminado', userRemoved});
                             }else{
-                                return res.status(404).send({message:'No se pudo eliminar al usuario o ya no fue eliminado'});
+                                return res.status(404).send({message:'No se pudo eliminar al usuario o ya fue eliminado'});
                             }
                         })
                     }else{

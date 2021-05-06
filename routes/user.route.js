@@ -12,7 +12,7 @@ api.post('/signIn', userController.signIn);
 api.post('/logIn', userController.logIn);
 api.put('/updateUser/:id', [mdAuth.ensureAuth], userController.updateUser);
 api.put('/removeUser/:id', mdAuth.ensureAuth, userController.removeUser);
-api.post('/createAdmin_Hotel/:id', [mdAuth.ensureAuth, mdAuth.validRolAdmin], userController.creatUserAdmin_Hotel);
+api.post('/createAdmin_Hotel/:id', [mdAuth.ensureAuth, mdAuth.validRolAdminOrAdminHotel], userController.creatUserAdmin_Hotel);
 
 //funciones de admministrador
 api.get('/listUsers/:id', [mdAuth.ensureAuth, mdAuth.validRolAdmin], userController.listUser);
