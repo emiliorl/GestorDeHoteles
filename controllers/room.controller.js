@@ -10,6 +10,7 @@ function prueba(req, res){
     res.status(200).send({message: 'Correcto'});
 }
 
+//Function setRoom creado
 function setRoom(req, res){
     var hotelId = req.params.id;
     var params = req.body;
