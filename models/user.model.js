@@ -12,7 +12,6 @@ var userSchema = Schema({
     email: String,
     password: String,
     image: String,
-    profilePicture: String,
     userHistory: [{type: Schema.ObjectId, ref: 'userHistory'}]
 });
 
