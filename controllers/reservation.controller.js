@@ -26,11 +26,64 @@ function listReservation(req, res){
 }
 
 function listReservationDisp(req, res){
+    let roomId = req.params.idRo;
+    let reservationId = req.params.idRe;
 
+
+    if(roomId != req.user.sub){
+        return res.status(500).send({message: 'No tienes permisos para realizar esta acción'});
+    }else{
+        Room.find({_id: roomId, Reservation: reservationId},
+            {$pull:{Reservation: reservationId}}, {new:true}, (err, reservationFind)=>{
+                if(err){
+                    return res.status(500).send({message: 'Error general'});
+                }else if(reservationFind){
+                    Reservation.find(reservationId, (err, reservationFound)=>{
+                        if(err){
+                            return res.status(500).send({message: 'Error general al encontrar reservaciones'});
+                        }else if(reservationFound){
+                            if(reservation.status == "Disponible")
+                            return res.send({message:'Habitaciones disponibles:', listReservation: reservationFind});
+                        }else{
+                            return res.status(500).send({message: 'No se encuentran reservaciones'});
+                        }
+                    })
+                }else{
+                    return res.status(404).send({message:'No se encuentran habitaciones disponibles'});
+                }
+            }).populate('reservation')
+    }
 }
 
-function listReservationNoDisp(req, res){
 
+function listReservationNoDisp(req, res){
+    let roomId = req.params.idRo;
+    let reservationId = req.params.idRe;
+
+
+    if(roomId != req.user.sub){
+        return res.status(500).send({message: 'No tienes permisos para realizar esta acción'});
+    }else{
+        Room.find({_id: roomId, Reservation: reservationId},
+            {$pull:{Reservation: reservationId}}, {new:true}, (err, reservationFind)=>{
+                if(err){
+                    return res.status(500).send({message: 'Error general'});
+                }else if(reservationFind){
+                    Reservation.find(reservationId, (err, reservationFound)=>{
+                        if(err){
+                            return res.status(500).send({message: 'Error general al encontrar reservaciones'});
+                        }else if(reservationFound){
+                            if(reservation.status == "No disponible")
+                            return res.send({message:'Habitaciones no disponibles:', listReservation: reservationFind});
+                        }else{
+                            return res.status(500).send({message: 'No se encuentran reservaciones'});
+                        }
+                    })
+                }else{
+                    return res.status(404).send({message:'No hay habitaciones reservadas'});
+                }
+            }).populate('reservation')
+    }
 }
 
 function removeReservation(req, res){
@@ -73,22 +126,22 @@ function findReservationBynameUser(req, res){
 
     if(params.search){
         User.find({$or:[{user: params.search}]}, (err, resultSearch)=>{
-                            if(err){
-                                return res.status(500).send({message: 'Error general'});
-                            }else if(resultSearch){
-                                Reservation.find((err, reservationFind) => {
-                                    if(err){
-                                        return res.status(500).send({message:'Error al listar las reservaciones'});
-                                    }else if(reservationFind){
-                                        return res.send({message:'Estas son las reservaciones:', findReservationBynameUser: reservationFind});
-                                    }else{
-                                        return res.status(404).send({message:'No se encuentran reservaciones'});
-                                    }
-                                })
-                            }else{
-                                return res.status(403).send({message: 'No hay reservaciones'});
-                            }
-                        })
+            if(err){
+                return res.status(500).send({message: 'Error general'});
+            }else if(resultSearch){
+                Reservation.find((err, reservationFind) => {
+                    if(err){
+                        return res.status(500).send({message:'Error al listar las reservaciones'});
+                    }else if(reservationFind){
+                        return res.send({message:'Estas son las reservaciones:', findReservationBynameUser: reservationFind});
+                    }else{
+                        return res.status(404).send({message:'No se encuentran reservaciones'});
+                    }
+                })
+            }else{
+                return res.status(403).send({message: 'No hay reservaciones'});
+            }
+        })
     }else{
         return res.status(403).send({message: 'Ingrese datos en el campo de búsqueda'});
     }
