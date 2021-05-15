@@ -50,7 +50,7 @@ function adminInit(req, res){
 
 //Funciones para un usuario comun
 
-function signIn(req, res){
+function signUp(req, res){
     var user = new User();
     var params = req.body;
 
@@ -247,7 +247,7 @@ function getImage(req, res){
 
 //---------------------------------------
 
-function logIn(req, res){
+function login(req, res){
     var params = req.body;
 
     if(params.username && params.password){
@@ -370,9 +370,9 @@ function creatUserAdmin_Hotel(req, res){
 
 module.exports = {
     prueba,
-    signIn,
+    signUp,
     adminInit,
-    logIn,
+    login,
     listUser,
     updateUser,
     removeUser,
