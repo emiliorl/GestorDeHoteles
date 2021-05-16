@@ -9,11 +9,12 @@ var upload = connectMultiparty({ uploadDir: './uploads/users'});
 var api = express.Router();
 
 //funciones para cualquier tipo de user
-api.get('/prueba', userController.prueba); // N/A
-api.post('/signUp', userController.signIn); // YA
-api.post('/login', userController.logIn); // YA
-api.put('/updateUser/:id', [mdAuth.ensureAuth], userController.updateUser); //YA
-api.put('/removeUser/:id', mdAuth.ensureAuth, userController.removeUser); //YA
+
+api.get('/prueba', userController.prueba);
+api.post('/signUp', userController.signUp);
+api.post('/login', userController.login);
+api.put('/updateUser/:id', [mdAuth.ensureAuth], userController.updateUser);
+api.put('/removeUser/:id', mdAuth.ensureAuth, userController.removeUser);
 api.post('/createAdmin_Hotel/:id', [mdAuth.ensureAuth, mdAuth.validRolAdminOrAdminHotel], userController.creatUserAdmin_Hotel);
 api.put('/:id/uploadImage', [mdAuth.ensureAuth, upload], userController.uploadImage); //YA
 api.get('/getImage/:fileName', [upload], userController.getImage);// N/A
