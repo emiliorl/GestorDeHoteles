@@ -10,11 +10,11 @@ var api = express.Router();
 
 //funciones para cualquier tipo de user
 
-api.get('/prueba', userController.prueba);
-api.post('/signUp', userController.signUp);
-api.post('/login', userController.login);
-api.put('/updateUser/:id', [mdAuth.ensureAuth], userController.updateUser);
-api.put('/removeUser/:id', mdAuth.ensureAuth, userController.removeUser);
+api.get('/prueba', userController.prueba); //YA
+api.post('/signUp', userController.signUp); // YA
+api.post('/login', userController.login); //YA 
+api.put('/updateUser/:id', [mdAuth.ensureAuth], userController.updateUser); //YA
+api.put('/removeUser/:id', mdAuth.ensureAuth, userController.removeUser); //YA
 api.post('/createAdmin_Hotel/:id', [mdAuth.ensureAuth, mdAuth.validRolAdminOrAdminHotel], userController.creatUserAdmin_Hotel);
 api.put('/:id/uploadImage', [mdAuth.ensureAuth, upload], userController.uploadImage); //YA
 api.get('/getImage/:fileName', [upload], userController.getImage);// N/A
