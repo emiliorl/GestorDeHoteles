@@ -8,6 +8,7 @@ var roomSchema = Schema({
     price: Number,
     description: String,
     status: String,
+    imageRoom: [String],
     hotel: {type: Schema.ObjectId, ref: "hotel"}
 });
 

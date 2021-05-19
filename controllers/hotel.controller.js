@@ -152,7 +152,7 @@ function listHotels(req, res){
     
     Hotel.find({}).select("-services -_id -user -__v").exec((err, hotelsFind)=>{
         if(err){
-            return res.status(500).send({message: 'Error general al obtener hotoles'});
+            return res.status(500).send({message: 'Error general al obtener hoteles'});
         }else if(hotelsFind){
             return res.send({message: 'Hoteles encontrados', hotelsFind});
         }else{

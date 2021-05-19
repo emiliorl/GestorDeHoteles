@@ -12,6 +12,7 @@ var hotelSchema = Schema({
     address: String,
     phoneHotel: Number,
     description: String,
+    imageHotel: String,
     user: {type: Schema.ObjectId, ref: "user"},
     services: [{type: Schema.ObjectId, ref: "service"}]
 });
