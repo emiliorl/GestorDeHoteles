@@ -8,6 +8,7 @@ var api = express.Router();
 
 api.post('/createService/:id', [mdAuth.ensureAuth, mdAuth.validRolAdminOrAdminHotel], serviceController.createService);
 api.post('/deleteService/:id', [mdAuth.ensureAuth, mdAuth.validRolAdminOrAdminHotel], serviceController.deleteService);
+api.put('/updateService/:id/:idS', [mdAuth.ensureAuth, mdAuth.validRolAdminOrAdminHotel], serviceController.updateService);
 api.get('/listService', serviceController.listService);
 api.post('/getService', serviceController.getService);
 

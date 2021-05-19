@@ -122,11 +122,11 @@ function updateUser(req, res){
                             return res.send({message: 'Nombre de usuario ya en uso'});
                         }
                     }else{
-                        User.findByIdAndUpdate(userId, update, {new: true}, (err, userUpdate) => {
+                        User.findByIdAndUpdate(userId, update, {new: true}, (err, userUpdated) => {
                             if(err){
                                 return res.status(500).send({message:'Error al intentar actualizar'});
-                            }else if(userUpdate){
-                                return res.send({message:'Usuario actualizado', userUpdate});
+                            }else if(userUpdated){
+                                return res.send({message:'Usuario actualizado', userUpdated});
                             }else{
                                 return res.status(500).send({message:'No se puede actualizar'});
                             }
@@ -136,11 +136,11 @@ function updateUser(req, res){
             }else if(update.rol){
                 return res.status(404).send({message: 'No puedes actualizar tu rol'});
             }else{
-                User.findByIdAndUpdate(userId, update, {new: true}, (err, userUpdate) => {
+                User.findByIdAndUpdate(userId, update, {new: true}, (err, userUpdated) => {
                     if(err){
                         return res.status(500).send({message:'Error al intentar actualizar'});
-                    }else if(userUpdate){
-                        return res.send({message:'Usuario actualizado', userUpdate});
+                    }else if(userUpdated){
+                        return res.send({message:'Usuario actualizado', userUpdated});
                     }else{
                         return res.status(500).send({message:'No se puede actualizar'});
                     }
@@ -280,21 +280,15 @@ function login(req, res){
 //Funciones para administrador
 
 function listUser(req, res){
-    let userId = req.params.id;
-    
-    if(userId != req.user.sub){
-        return res.status(404).send({message:'No tienes permiso para realizar esta funcion'});
-    }else{
-        User.find((err, userFind) => {
-            if(err){
-                return res.status(500).send({message:'Error general al intentar listar usuarios'});
-            }else if(userFind){
-                return res.send({message:'Listado de usuarios registrados', listUsers: userFind});
-            }else{
-                return res.status(404).send({message:'No hay usuarios logeados'});
-            }
-        })
-    }
+    User.find({}).exec((err, usersFind) => {
+        if(err){
+            return res.status(500).send({message:'Error al buscar usuarios'});
+        }else if(usersFind){
+            return res.send({message:'Usuarios encontrados', users: usersFind});   
+        }else{
+            return res.status(404).send({message:'No se encontraron usuarios'});
+        }
+    })
 }
 
 function creatUserAdmin_Hotel(req, res){

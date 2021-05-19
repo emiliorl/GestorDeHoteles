@@ -86,6 +86,47 @@ function deleteService(req, res){
         }
     }
 }
+
+function updateService(req, res){
+    let userId = req.params.id;
+    let serviceId = req.params.idS;
+    let update = req.body;
+
+    if(userId != req.user.sub){
+        return res.status(404).send({message:'No tienes permiso para actualizar esta cuenta'});
+    }else{
+        if(update.nameService){
+            Service.findOne({nameService: update.nameService}, (err, serviceFind) => {
+                if(err){
+                    return res.status(500).send({message:'Error al buscar servicio'});
+                }else if(serviceFind){
+                    return res.send({message: 'Servicio ya existente, crea uno nuevo o actualiza el que ya esta creado'})
+                }else{
+                    Service.findByIdAndUpdate(serviceId, update, {new: true}, (err, serviceupdate) => {
+                        if(err){
+                            return res.status(500).send({message:'Error al actualizar servicio'});
+                        }else if(serviceupdate){
+                            return res.status(200).send({message:'Servicio actualizado', serviceupdate});
+                        }else{
+                            return res.status(404).send({message:'No se pudo actualizar el servicio'});
+                        }
+                    })
+                }
+            })
+        }else{
+            Service.findByIdAndUpdate(serviceId, update, {new: true}, (err, serviceupdate) => {
+                if(err){
+                    return res.status(500).send({message:'Error al actualizar servicio'});
+                }else if(serviceupdate){
+                    console.log('Servicio: '+serviceupdate);
+                    return res.send({message:'Servicio actualizado', serviceupdate});
+                }else{
+                    return res.status(404).send({message:'No se pudo actualizar el servicio'});
+                }
+            })
+        }
+    }
+}
 //----------------------------------------------
 
 //funciones para cualquier rol
@@ -119,5 +160,6 @@ module.exports = {
     createService,
     deleteService,
     listService,
-    getService
+    getService,
+    updateService
 }
