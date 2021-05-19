@@ -2,6 +2,7 @@
 
 var User = require('../models/user.model');
 var Service = require('../models/service.model');
+var Hotel = require('../models/hotel.model')
 var bcrypt = require('bcrypt-nodejs');
 
 //funciones de ADMIN y ADMIN_HOTEL
@@ -27,7 +28,15 @@ function createService(req, res){
                         if(err){
                             return res.status(400).send({message:'Error general al intentar crear Service'});
                         }else if(serviceSaved){
-                            return res.send({message:'El servicio se creo exitosamente', showService: serviceSaved});
+                            Hotel.findByIdAndUpdate(hotelId, {$push:{services: serviceSaved._id}}, {new: true}, (err, servicePush)=>{
+                                if(err){
+                                    return res.status(500).send({message: 'Error general al agergar factura'})
+                                }else if(servicePush){
+                                    return res.send({message:'El servicio se creo exitosamente', showService: serviceSaved});
+                                }else{
+                                    return res.status(500).send({message: 'Error al agregar factura'})
+                                }
+                            })
                         }else{
                             return res.status(400).send({message:'No sea ha podido crear el servicio'});
                         }

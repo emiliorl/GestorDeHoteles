@@ -12,7 +12,8 @@ var hotelSchema = Schema({
     address: String,
     phoneHotel: Number,
     description: String,
-    user: [{type: Schema.ObjectId, ref: "user"}]
+    user: {type: Schema.ObjectId, ref: "user"},
+    services: [{type: Schema.ObjectId, ref: "service"}]
 });
 
 module.exports = mongoose.model('hotel', hotelSchema);

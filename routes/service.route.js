@@ -6,10 +6,10 @@ var mdAuth = require('../middleware/authenticated');
 
 var api = express.Router();
 
-api.post('/createService/:id', [mdAuth.ensureAuth, mdAuth.validRolAdminOrAdminHotel], serviceController.createService);
-api.post('/deleteService/:id', [mdAuth.ensureAuth, mdAuth.validRolAdminOrAdminHotel], serviceController.deleteService);
-api.put('/updateService/:id/:idS', [mdAuth.ensureAuth, mdAuth.validRolAdminOrAdminHotel], serviceController.updateService);
-api.get('/listService', serviceController.listService);
-api.post('/getService', serviceController.getService);
+api.post('/:id/createService/:hid', [mdAuth.ensureAuth, mdAuth.validRolAdminHotel], serviceController.createService);
+api.post('/:id/deleteService/:hid', [mdAuth.ensureAuth, mdAuth.validRolAdminHotel], serviceController.deleteService);
+api.put('/:id/updateService/:hid/:idS', [mdAuth.ensureAuth, mdAuth.validRolAdminHotel], serviceController.updateService);
+api.get('/:hid/listService', serviceController.listService);
+api.post('/:hid/getService', serviceController.getService);
 
 module.exports = api;
