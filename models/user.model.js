@@ -11,8 +11,7 @@ var userSchema = Schema({
     phone: Number,
     email: String,
     password: String,
-    image: String,
-    profilePicture: String,
+    image: {type: String, default: "defaultProfilePicture.png"},
     receipts: [{type: Schema.ObjectId, ref: 'receipt'}]
 });
 
