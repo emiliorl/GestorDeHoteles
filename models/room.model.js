@@ -8,7 +8,8 @@ var roomSchema = Schema({
     price: Number,
     description: String,
     status: String,
-    hotel: [{type: Schema.ObjectId, ref: "hotel"}]
+    imageRoom: [String],
+    hotel: {type: Schema.ObjectId, ref: "hotel"}
 });
 
 module.exports = mongoose.model('room', roomSchema);

@@ -2,7 +2,7 @@
 
 var Service = require('../models/service.model')
 var Room = require('../models/room.model');
-var User = require('./models/user.model')
+var User = require('../models/user.model')
 var bcrypt = require('bcrypt-nodejs');
 var jwt = require('../services/jwt');
 

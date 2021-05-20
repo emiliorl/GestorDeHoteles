@@ -6,7 +6,7 @@ var Schema = mongoose.Schema;
 var receiptSchema = Schema({
     date: Date,
     serviceAfter: [{type: Schema.ObjectId, ref: 'service'}],
-    reservation: [{type: Schema.ObjectId, ref: 'reservation'}],
+    reservation: {type: Schema.ObjectId, ref: 'reservation'},
     total: Number
 });
 

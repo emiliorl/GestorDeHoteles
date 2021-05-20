@@ -103,7 +103,10 @@ function updateUser(req, res){
         if(update.password){
             return res.status(404).send({message:'No se puede actualizar la password'});
         }else{
-            if(update.username){
+            if(update.rol){
+                return res.status(404).send({message: 'No puedes actualizar el rol'});
+            }else if(update.username){
+                update.username = update.username.toLowerCase();
                 User.findOne({username: update.username.toLowerCase()}, (err, userFind) => {
                     if(err){
                         return res.status(500).send({message:'Error al buscar usuario'});
@@ -133,8 +136,6 @@ function updateUser(req, res){
                         });                
                     }
                 })
-            }else if(update.rol){
-                return res.status(404).send({message: 'No puedes actualizar tu rol'});
             }else{
                 User.findByIdAndUpdate(userId, update, {new: true}, (err, userUpdated) => {
                     if(err){

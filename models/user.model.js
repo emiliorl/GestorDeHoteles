@@ -11,8 +11,8 @@ var userSchema = Schema({
     phone: Number,
     email: String,
     password: String,
-    image: String,
-    userHistory: [{type: Schema.ObjectId, ref: 'userHistory'}]
+    image: {type: String, default: "defaultProfilePicture.png"},
+    receipts: [{type: Schema.ObjectId, ref: 'receipt'}]
 });
 
 module.exports = mongoose.model('user', userSchema);
