@@ -35,9 +35,9 @@ function adminInit(req, res){
                         if(err){
                             console.log('Error al crear el admin');
                         }else if(adminSaved){
-                            console.log('Usuario administrador creado');
+                            console.log('Usuario creado exitosamente');
                         }else{
-                            console.log('Usuario administrador no creado');
+                            console.log('Usuario no creado, error al crear usuario');
                         }
                     })
                 }else{
@@ -299,7 +299,7 @@ function creatUserAdmin_Hotel(req, res){
     if(userId != req.user.sub){
         return res.status(404).send({message:'No tienes permiso para realizar esta accion'});
     }else{
-        if(params.name && params.lastname && params.username && params.phone && params.email && params.password && params.passwordAdmin){
+        if(params.name && params.username && params.email && params.password && params.rol){
             User.findOne({username: params.username.toLowerCase()}, (err, userFind) => {
                 if(err){
                     return res.status(500).send({message:'Error al buscar al usuario'});
@@ -310,37 +310,22 @@ function creatUserAdmin_Hotel(req, res){
                         if(err){
                             return res.status(500).send({message:'Error al encriptar la contraseña'});
                         }else if(passwordHash){
-                            User.findOne({_id: userId}, (err, userFind) => {
+                            
+                            user.password = passwordHash;
+                            user.name = params.name;
+                            user.lastname = params.lastname;
+                            user.username = params.username.toLowerCase();
+                            user.rol = params.rol;
+                            user.phone = params.phone; 
+                            user.email = params.email;
+                            
+                            user.save((err, userSaved) => {
                                 if(err){
-                                    return res.status(500).send({message:'Error al buscar usuario'});
-                                }else if(userFind){
-                                    bcrypt.compare(params.passwordAdmin, userFind.password, (err, checkPas) => {
-                                        if(err){
-                                            return res.status(500).send({message:'Error al buscar password, no olvides colocar la contraseña'});
-                                        }else if(checkPas){
-                                            user.password = passwordHash;
-                                            user.name = params.name;
-                                            user.lastname = params.lastname;
-                                            user.username = params.username.toLowerCase();
-                                            user.rol = "ADMIN_HOTEL";
-                                            user.phone = params.phone; 
-                                            user.email = params.email;
-                
-                                            user.save((err, userSaved) => {
-                                                if(err){
-                                                    return res.status(500).send({message:'Error al intentar guardar'});
-                                                }else if(userSaved){
-                                                    return res.send({message:'Se ha creado exitosamente el administrador del hotel', userSaved});
-                                                }else{
-                                                    return res.status(401).send({message:'No se guardo el administrador del hotel'});
-                                                }
-                                            })
-                                        }else{
-                                            return res.status(500).send({message:'Password incorrecta'});
-                                        }
-                                    })
+                                    return res.status(500).send({message:'Error al intentar guardar'});
+                                }else if(userSaved){
+                                    return res.send({message:'Se ha creado exitosamente el administrador del hotel', userSaved});
                                 }else{
-                                    return res.status(404).send({message:'El usuario no existe'});
+                                    return res.status(401).send({message:'No se guardo el administrador del hotel'});
                                 }
                             })
                         }else{

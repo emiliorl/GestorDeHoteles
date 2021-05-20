@@ -15,7 +15,7 @@ api.post('/signUp', userController.signUp); // YA
 api.post('/login', userController.login); //YA 
 api.put('/updateUser/:id', [mdAuth.ensureAuth], userController.updateUser); //YA
 api.put('/removeUser/:id', mdAuth.ensureAuth, userController.removeUser); //YA
-api.post('/createAdmin_Hotel/:id', [mdAuth.ensureAuth, mdAuth.validRolAdminOrAdminHotel], userController.creatUserAdmin_Hotel);
+api.post('/createAdminHotel/:id', [mdAuth.ensureAuth, mdAuth.validRolAdmin], userController.creatUserAdmin_Hotel); //YA
 api.put('/:id/uploadImage', [mdAuth.ensureAuth, upload], userController.uploadImage); //YA
 api.get('/getImage/:fileName', [upload], userController.getImage);// N/A
 
