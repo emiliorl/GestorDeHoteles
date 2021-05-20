@@ -6,10 +6,10 @@ var mdAuth = require('../middleware/authenticated');
 
 var api = express.Router();
 
-api.post('/createEvent/:id', [mdAuth.ensureAuth, mdAuth.validRolAdminOrAdminHotel], eventController.createEvent);
-api.post('/deleteEvent/:idE', [mdAuth.ensureAuth, mdAuth.validRolAdminOrAdminHotel], eventController.deleteEvent);
-api.post('/updateEvent/:id', [mdAuth.ensureAuth, mdAuth.validRolAdminOrAdminHotel], eventController.updateEvent);
-api.get('/listEvent', eventController.listEvent);
-api.post('/getEvent', eventController.getEvent);
+api.post('/:id/createEvent/:hid', [mdAuth.ensureAuth, mdAuth.validRolAdminHotel], eventController.createEvent);
+api.post('/:id/deleteEvent/:hid/:idE', [mdAuth.ensureAuth, mdAuth.validRolAdminHotel], eventController.deleteEvent);
+api.post('/:id/updateEvent/:hid/:idE', [mdAuth.ensureAuth, mdAuth.validRolAdminHotel], eventController.updateEvent);
+api.get('/:hid/listEvent', eventController.listEvent);
+api.post('/:hid/getEvent', eventController.getEvent);
 
 module.exports = api;

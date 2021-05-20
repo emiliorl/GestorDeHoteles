@@ -165,12 +165,12 @@ function getHotel(req, res,){
     let params = req.body;
 
     if(params.search){
-        Hotel.find({$or : [{nameHotel : params.search},
+        Hotel.find({$or : [{nameHotel : {$regex: params.search}},
                             {country : params.search},
                             {state : params.search},
                             {city : params.search},
                             {zipCode : params.search},
-                            {address : params.search}]}, {'_id': 0, 'services': 0, 'user': 0, '__v': 0}, (err, resultSerarch)=>{
+                            {address : {$regex: params.search}}]}, {'_id': 0, 'services': 0, 'user': 0, '__v': 0}, (err, resultSerarch)=>{
                                 if(err){
                                     return res.status(500).send({message: 'Error general al buscar hoteles'});
                                 }else if(resultSerarch){
