@@ -20,7 +20,7 @@ function createService(req, res){
             Hotel.findById(hotelId, (err, hotelFind) => {
                 if(err){
                     return res.status(400).send({message:'Error general al intentar buscar el hotel'});
-                }else if(hotelFind){
+                }else if(hotelFind.user == userId){
                     Service.findOne({nameService: params.nameService}, (err, findService) => {
                         if(err){
                             return res.status(400).send({message:'Error general al intentar buscar Service'});
