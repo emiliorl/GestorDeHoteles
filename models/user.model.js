@@ -12,7 +12,7 @@ var userSchema = Schema({
     email: String,
     password: String,
     image: {type: String, default: "defaultProfilePicture.png"},
-    receipts: [{type: Schema.ObjectId, ref: 'receipt'}]
+    reservations: [{type: Schema.ObjectId, ref: 'receipt'}]
 });
 
 module.exports = mongoose.model('user', userSchema);
