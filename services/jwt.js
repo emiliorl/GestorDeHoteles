@@ -13,7 +13,7 @@ exports.createToken = (user) =>{
         phone: user.phone,
         rol: user.rol,
         iat: moment().unix(),
-        exp: moment().add(3600, 'seconds').unix()
+        exp: moment().add(5, 'hours').unix()
     }
     return jwt.encode(payload, secretKey);
 }
