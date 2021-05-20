@@ -24,7 +24,7 @@ function createService(req, res){
                     Service.findOne({nameService: params.nameService, _id: {"$in": hotelFind.services}}, (err, findService) => {
                         if(err){
                             return res.status(400).send({message:'Error general al intentar buscar Service'});
-                        }else if(findService > 0){
+                        }else if(findService){
                             return res.send({message:'Este servicio ya ha sido creado anteriormente'});
                         }else{   
                             service.nameService = params.nameService.toLowerCase();
