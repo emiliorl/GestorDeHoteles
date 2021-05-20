@@ -179,6 +179,10 @@ function getEvent(req, res){
             return res.status(500).send({message: 'Error general al obtener el hotel'});
         }else if(hotelFind){
             if(params.search){
+                var valid = new Date(params.search)
+                if('Invalid Date' != valid){
+                    return res.send({mensaje: 'La fecha de busqueda es correcta'});
+                }
                 Event.find({$or : [{nameEvent : {$regex: params.search}},
                                 {typeEvent : {$regex: params.search}}], 
                                 hotel : hotelId}, {'_id': 0, 'hotel': 0, '__v': 0}, (err, eventsFind)=>{
@@ -191,7 +195,7 @@ function getEvent(req, res){
                                     }
                                 });
             }else{
-                 return res.send({mensaje: 'Ingrese en el campo de busqueda'});
+                return res.send({mensaje: 'Ingrese en el campo de busqueda'});
             }
         }else{
             return res.status(404).send({message:'No se encontro el hotel'});

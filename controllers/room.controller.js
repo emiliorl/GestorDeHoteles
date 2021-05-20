@@ -5,24 +5,20 @@ var Room = require('../models/room.model');
 var bcrypt = require('bcrypt-nodejs');
 var jwt = require('../services/jwt');
 
-function prueba(req, res){
-    console.log(req.user);
-    res.status(200).send({message: 'Correcto'});
-}
-
 //Function setRoom creado
 function setRoom(req, res){
-    var hotelId = req.params.id;
+    var userId = req.params.id;
+    var hotelId = req.params.hid;
     var params = req.body;
     var room = new Room();
 
-    if(hotelId != req.hotel.sub){
+    if(userId != req.user.sub){
         return res.status(500).send({message: 'No tienes permisos para realizar esta acción'})
     }else{
         Hotel.findById(hotelId, (err, hotelFind)=>{
             if(err){
                 return res.status(500).send({message: 'Error general'})
-            }else if(hotelFind){
+            }else if(hotelFind.user == userId){
                 room.nameRoom = params.nameRoom;
                 room.price = params.price;
                 room.description = params.description;
@@ -149,7 +145,6 @@ function listRoom(req, res){
 }
 
 module.exports = {
-    prueba,
     setRoom,
     updateRoom,
     removeRoom,

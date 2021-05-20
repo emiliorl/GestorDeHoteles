@@ -21,13 +21,12 @@ function createService(req, res){
                 if(err){
                     return res.status(400).send({message:'Error general al intentar buscar el hotel'});
                 }else if(hotelFind.user == userId){
-                    Service.findOne({nameService: params.nameService}, (err, findService) => {
+                    Service.findOne({nameService: params.nameService, _id: {"$in": hotelFind.services}}, (err, findService) => {
                         if(err){
                             return res.status(400).send({message:'Error general al intentar buscar Service'});
                         }else if(hotelFind.services.includes(findService._id)){
                             return res.send({message:'Este servicio ya ha sido creado anteriormente'});
-                        }else{            
-                            console.log('hotelFind.services.includes(findService._id)' + hotelFind.services.includes(findService._id))
+                        }else{   
                             service.nameService = params.nameService.toLowerCase();
                             service.price = params.price;
                 
