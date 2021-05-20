@@ -7,7 +7,7 @@ var reservationSchema = Schema({
     checkIn: Date,
     checkOut: Date,
     user: {type: Schema.ObjectId, ref: 'user'},
-    room: [{type: Schema.ObjectId, ref: 'room'}],
+    room: {type: Schema.ObjectId, ref: 'room'},
     serviceBefore: [{type: Schema.ObjectId, ref: 'service'}],
 });
 

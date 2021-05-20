@@ -6,7 +6,9 @@ var mdAuth = require('../middleware/authenticated');
 
 var api = express.Router();
 
-api.get('/listReservation', reservationController.listReservation);
+api.post('/:id/:hid/:rid/makeReservation', mdAuth.ensureAuth, reservationController.createReservation);
+api.get('/listReservation', mdAuth.ensureAuth, reservationController.listReservation);
+api.post('/:hid/:rid/listReservation', reservationController.checkStatusRoom);
 api.get('/listReservationDisp', reservationController.listReservationDisp);
 api.get('/listReservationNoDisp', reservationController.listReservationNoDisp);
 api.post('/removeReservation/:id', [mdAuth.ensureAuth, mdAuth.validRolAdminOrAdminHotel], reservationController.removeReservation);
