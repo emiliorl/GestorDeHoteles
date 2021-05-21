@@ -184,6 +184,23 @@ function getHotel(req, res,){
     }
 }
 
+function getHotelsAdmin(req, res){
+    let adminHotelId = req.params.id;
+
+    if(req.user.sub != adminHotelId){
+        return res.status(500).send({message: 'No tienes permiso para acceder a esta función.'});
+    }else{        
+        Hotel.find({user: adminHotelId}, (err, hotelsFind) => {
+            if(err){
+                return res.status(500).send({message: 'Error general al obtener hoteles'});
+            }else if(hotelsFind){
+                return res.send({message: 'Hoteles encontrados', hotelsFind});
+            }else{
+                return res.status(404).send({message: 'No se encontraron hoteles o aun no has creado uno'});
+            }
+        })
+    }
+}
 
 
 //------ Exportaciones------------------
@@ -192,5 +209,6 @@ module.exports = {
     updateHotel,
     deleteHotel,
     listHotels, 
-    getHotel
+    getHotel,
+    getHotelsAdmin
 }
