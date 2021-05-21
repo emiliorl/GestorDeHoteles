@@ -11,6 +11,6 @@ api.put('/:id/updateHotel/:idH', [mdAuth.ensureAuth, mdAuth.validRolAdminHotel],
 api.post('/:id/deleteHotel/:idH', [mdAuth.ensureAuth, mdAuth.validRolAdminHotel], hotelController.deleteHotel);
 api.get('/listHotels', hotelController.listHotels);
 api.post('/getHotel', hotelController.getHotel);
-api.post('/getHotelsAdmin/:id', [mdAuth.ensureAuth, mdAuth.validRolAdminHotel], hotelController.getHotelsAdmin);
+api.get('/getHotelsAdmin/:id', [mdAuth.ensureAuth, mdAuth.validRolAdminHotel], hotelController.getHotelsAdmin);
 
 module.exports = api;
