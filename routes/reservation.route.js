@@ -6,12 +6,14 @@ var mdAuth = require('../middleware/authenticated');
 
 var api = express.Router();
 
+//rid - Room ID y idR - Reservation ID
 api.post('/:id/:hid/:rid/makeReservation', mdAuth.ensureAuth, reservationController.createReservation);
-api.get('/listReservation', mdAuth.ensureAuth, reservationController.listReservation);
-api.post('/:hid/:rid/listReservation', reservationController.checkStatusRoom);
-api.get('/listReservationDisp', reservationController.listReservationDisp);
+api.post('/:id/:idR/updateReservation', mdAuth.ensureAuth, reservationController.updateReservation);
+api.get('/:id/listReservations', mdAuth.ensureAuth, reservationController.listReservation);
+api.get('/:id/:hid/listAvailableRooms', reservationController.listAvailableRooms);
+api.get('/:id/:hid/listNotAvailableRooms', [mdAuth.ensureAuth, mdAuth.validRolAdminOrAdminHotel], reservationController.listNotAvailableRooms);
 api.get('/listReservationNoDisp', reservationController.listReservationNoDisp);
-api.post('/removeReservation/:id', [mdAuth.ensureAuth, mdAuth.validRolAdminOrAdminHotel], reservationController.removeReservation);
+api.post('/:id/:idR/deleteReservation', mdAuth.ensureAuth, reservationController.removeReservation);
 api.get('/findReservationBynameUser/:id', reservationController.findReservationBynameUser);
 
 module.exports = api;

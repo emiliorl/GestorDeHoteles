@@ -29,7 +29,6 @@ function createReservation(req,res){
                             if(err){
                                 return res.status(500).send({message:'Error al buscar otras reservacion que coincidadn con la fecha'});
                             }else if(reservationFind){
-                                console.log(reservationFind)
                                 return res.status(404).send({message:'La haitacion no esta diponible'});
                             }else{
                                 reservation.checkIn = params.checkIn;
@@ -73,6 +72,214 @@ function createReservation(req,res){
     }
 }
 
+function updateReservation(req,res){
+    var userId = req.params.id;
+    var reservationId = req.params.idR;
+    var update = req.body;
+
+    if(userId != req.user.sub || update.user){
+        return res.status(404).send({message:'No tienes permiso para hacer esto'});
+    }else{
+        User.findById(userId).exec((err,userFind)=> {
+            if(err){
+                return res.status(500).send({message:'Error al buscar el usuario'});
+            }else if(userFind){
+                if(update.room || update.checkIn || update.checkOut){
+                    Reservation.findById(reservationId).exec((err, reservationFind)=> {
+                        if(err){
+                            return res.status(500).send({message:'Error al buscar la reservacion'});
+                        }else if(reservationFind.user == userId){
+                            if(update.checkIn && update.checkOut && update.room){
+                                Room.find({_id:[update.room,reservationFind.room]}).exec((err, roomFindU) => {
+                                    if(err){
+                                        return res.status(500).send({message:'Error general al intentar listar habitaciones'});
+                                    }else if(roomFindU.length > 1){
+                                        var checkIn = new Date(update.checkIn);
+                                        var checkOut = new Date(update.checkOut);
+                                        var time = new Date().getTime();
+                                        var today = new Date(time);
+                                        if(checkIn >= today && checkOut >= today && checkIn < checkOut){
+                                            Reservation.findOne({checkIn: {$gte: update.checkIn}, checkOut: {$lte: update.checkOut}, room: update.room, _id: {$ne: reservationFind._id}}, (err, reservationFindMatch)=>{
+                                                if(err){
+                                                    return res.status(500).send({message:'Error al buscar otras reservacion que coincidadn con la fecha'});
+                                                }else if(reservationFindMatch){
+                                                    return res.status(404).send({message:'La haitacion no esta diponible'});
+                                                }else{
+                                                    Reservation.findByIdAndUpdate(reservationId, update, {new: true}, (err, reservationUpdate) => {
+                                                        if(err){
+                                                            return res.status(500).send({message:'Error al actualizar la reservacion'});
+                                                        }else if(reservationUpdate){
+                                                            return res.status(200).send({message:'Reservacion actualizada', reservationUpdate});
+                                                        }else{
+                                                            return res.status(404).send({message:'No se pudo actualizar la reservacion'});
+                                                        }
+                                                    })
+                                                }
+                                            })
+                                        }else{
+                                            return res.send({message: 'Fechas no validas'});
+                                        }
+                                    }else{
+                                        return res.status(404).send({message:'Las haitaciones no coinciden'});
+                                    }
+                                })
+                            }else if(update.checkIn && update.checkOut && !update.room){
+                                var checkIn = new Date(update.checkIn);
+                                var checkOut = new Date(update.checkOut);
+                                var time = new Date().getTime();
+                                var today = new Date(time);
+                                if(checkIn >= today && checkOut >= today && checkIn < checkOut){
+                                    Reservation.findOne({checkIn: {$gte: update.checkIn}, checkOut: {$lte: update.checkOut}, _id: {$ne: reservationFind._id}}, (err, reservationFindMatch)=>{
+                                        if(err){
+                                            return res.status(500).send({message:'Error al buscar otras reservacion que coincidadn con la fecha'});
+                                        }else if(reservationFindMatch){
+                                            return res.status(404).send({message:'La haitacion no esta diponible'});
+                                        }else{
+                                            Reservation.findByIdAndUpdate(reservationId, update, {new: true}, (err, reservationUpdate) => {
+                                                if(err){
+                                                    return res.status(500).send({message:'Error al actualizar la reservacion'});
+                                                }else if(reservationUpdate){
+                                                    return res.status(200).send({message:'Reservacion actualizada', reservationUpdate});
+                                                }else{
+                                                    return res.status(404).send({message:'No se pudo actualizar la reservacion'});
+                                                }
+                                            })
+                                        }
+                                    })
+                                }else{
+                                    return res.send({message: 'Fechas no validas'});
+                                }
+                            }else if(update.checkIn && update.room){
+                                Room.find({_id:[update.room,reservationFind.room]}).exec((err, roomFindU) => {
+                                    if(err){
+                                        return res.status(500).send({message:'Error general al intentar listar habitaciones'});
+                                    }else if(roomFindU.length > 1){
+                                        var checkIn = new Date(update.checkIn);
+                                        var time = new Date().getTime();
+                                        var today = new Date(time);
+                                        if(checkIn >= today && checkIn < reservationFind.checkOut){
+                                            Reservation.findOne({checkIn: {$gte: update.checkIn}, checkOut: {$lte: reservationFind.checkOut}, room: update.room, }, (err, reservationFindMatch)=>{
+                                                if(err){
+                                                    return res.status(500).send({message:'Error al buscar otras reservacion que coincidadn con la fecha'});
+                                                }else if(reservationFindMatch){
+                                                    return res.status(404).send({message:'La haitacion no esta diponible'});
+                                                }else{
+                                                    Reservation.findByIdAndUpdate(reservationId, update, {new: true}, (err, reservationUpdate) => {
+                                                        if(err){
+                                                            return res.status(500).send({message:'Error al actualizar la reservacion'});
+                                                        }else if(reservationUpdate){
+                                                            return res.status(200).send({message:'Reservacion actualizada', reservationUpdate});
+                                                        }else{
+                                                            return res.status(404).send({message:'No se pudo actualizar la reservacion'});
+                                                        }
+                                                    })
+                                                }
+                                            })
+                                        }else{
+                                            return res.send({message: 'Fechas no validas'});
+                                        }
+                                    }else{
+                                        return res.status(404).send({message:'Las haitaciones no coinciden'});
+                                    }
+                                })
+                            }else if(update.checkOut && update.room){
+                                Room.find({_id:[update.room,reservationFind.room]}).exec((err, roomFindU) => {
+                                    if(err){
+                                        return res.status(500).send({message:'Error general al intentar listar habitaciones'});
+                                    }else if(roomFindU.length > 1){
+                                        var checkOut = new Date(update.checkOut);
+                                        var time = new Date().getTime();
+                                        var today = new Date(time);
+                                        if(checkOut >= today && checkOut > reservationFind.checkIn){
+                                            Reservation.findOne({checkIn: {$gte: reservationFind.checkIn}, checkOut: {$lte: update.checkOut}, room: update.room}, (err, reservationFindMatch)=>{
+                                                if(err){
+                                                    return res.status(500).send({message:'Error al buscar otras reservacion que coincidadn con la fecha'});
+                                                }else if(reservationFindMatch){
+                                                    return res.status(404).send({message:'La haitacion no esta diponible'});
+                                                }else{
+                                                    Reservation.findByIdAndUpdate(reservationId, update, {new: true}, (err, reservationUpdate) => {
+                                                        if(err){
+                                                            return res.status(500).send({message:'Error al actualizar la reservacion'});
+                                                        }else if(reservationUpdate){
+                                                            return res.status(200).send({message:'Reservacion actualizada', reservationUpdate});
+                                                        }else{
+                                                            return res.status(404).send({message:'No se pudo actualizar la reservacion'});
+                                                        }
+                                                    })
+                                                }
+                                            })
+                                        }else{
+                                            return res.send({message: 'Fechas no validas'});
+                                        }
+                                    }else{
+                                        return res.status(404).send({message:'Las haitaciones no coinciden'});
+                                    }
+                                })
+                            }else if(update.checkIn){
+                                var checkIn = new Date(update.checkIn);
+                                var time = new Date().getTime();
+                                var today = new Date(time);
+                                if(checkIn >= today && checkIn < reservationFind.checkOut){
+                                    Reservation.findOne({checkIn: {$gte: update.checkIn}, checkOut: {$lte: reservationFind.checkOut}, _id: {$ne: reservationFind._id}}, (err, reservationFindMatch)=>{
+                                        if(err){
+                                            return res.status(500).send({message:'Error al buscar otras reservacion que coincidadn con la fecha'});
+                                        }else if(reservationFindMatch){
+                                            return res.status(404).send({message:'La haitacion no esta diponible'});
+                                        }else{
+                                            Reservation.findByIdAndUpdate(reservationId, update, {new: true}, (err, reservationUpdate) => {
+                                                if(err){
+                                                    return res.status(500).send({message:'Error al actualizar la reservacion'});
+                                                }else if(reservationUpdate){
+                                                    return res.status(200).send({message:'Reservacion actualizada', reservationUpdate});
+                                                }else{
+                                                    return res.status(404).send({message:'No se pudo actualizar la reservacion'});
+                                                }
+                                            })
+                                        }
+                                    })
+                                }else{
+                                    return res.send({message: 'Fechas no validas'});
+                                }
+                            }else if(update.checkOut){
+                                var checkOut = new Date(update.checkOut);
+                                var time = new Date().getTime();
+                                var today = new Date(time);
+                                if(checkOut >= today && checkOut > reservationFind.checkIn){
+                                    Reservation.findOne({checkIn: {$gte: reservationFind.checkIn}, checkOut: {$lte: update.checkOut}, _id: {$ne: reservationFind._id}}, (err, reservationFindMatch)=>{
+                                        if(err){
+                                            return res.status(500).send({message:'Error al buscar otras reservacion que coincidadn con la fecha'});
+                                        }else if(reservationFindMatch){
+                                            return res.status(404).send({message:'La haitacion no esta diponible'});
+                                        }else{
+                                            Reservation.findByIdAndUpdate(reservationId, update, {new: true}, (err, reservationUpdate) => {
+                                                if(err){
+                                                    return res.status(500).send({message:'Error al actualizar la reservacion'});
+                                                }else if(reservationUpdate){
+                                                    return res.status(200).send({message:'Reservacion actualizada', reservationUpdate});
+                                                }else{
+                                                    return res.status(404).send({message:'No se pudo actualizar la reservacion'});
+                                                }
+                                            })
+                                        }
+                                    })
+                                }else{
+                                    return res.send({message: 'Fechas no validas'});
+                                }
+                            }
+                        }else{
+                            return res.status(404).send({message:'No se encontro la reservacion'});
+                        }
+                    })
+                }else{
+                    return res.status(404).send({message:'Ingrese algun paramtero para actualizar'});
+                }
+            }else{
+                return res.status(404).send({message:'No se encontro el usuario'});
+            }
+        })
+    }
+}
+
 function listReservation(req, res){
     let userId = req.params.id;
 
@@ -91,7 +298,7 @@ function listReservation(req, res){
     }
 }
 
-function listReservationDisp(req, res){
+/* function listReservationDisp(req, res){
     let roomId = req.params.idRo;
     let reservationId = req.params.idRe;
 
@@ -119,40 +326,90 @@ function listReservationDisp(req, res){
                 }
             }).populate('reservation')
     }
+} */
+
+function listAvailableRooms(req, res){
+    let userId = req.params.id;
+    let hotelId = req.params.hid;
+
+
+    if(userId != req.user.sub){
+        return res.status(500).send({message: 'No tienes permisos para realizar esta acción'});
+    }else{
+        var time = new Date().getTime();
+        var today = new Date('10/11/2021');
+        var yesterday = new Date(today-86400000);
+        var tomorrow = new Date(today+86400000);
+        Hotel.findById(hotelId).exec((err,hotelFind)=> {
+            if(err){
+                return res.status(500).send({message: 'Error general'});
+            }else if(hotelFind){
+                Reservation.find({checkIn: {$gte: yesterday}, checkOut: {$lte: tomorrow}}).exec((err,reservationFind)=> {
+                    if(err){
+                        return res.status(500).send({message: 'Error general'});
+                    }else if(reservationFind){
+                        var unique = reservationFind.map(reservationItem => reservationItem.room).filter((v,i,a)=> a.indexOf(v) === i)
+                        console.log(unique)
+                        Room.find({_id: {$nin: unique}, hotel: hotelId}).exec((err,findRooms)=> {
+                            if(err){
+                                return res.status(500).send({message: 'Error general'});
+                            }else if(findRooms){
+                                return res.send({message: 'Habitaciones Disponidles', Habitaciones: findRooms});
+                            }else{
+                                return res.status(404).send({message:'No hay habitaciones reservadas'});
+                            }
+                        })
+                    }else{
+                        return res.status(404).send({message:'No hay habitaciones reservadas'});
+                    }
+                })
+            }else{
+                return res.status(404).send({message:'No hay habitaciones reservadas'});
+            }
+        })
+    }
 }
 
-function checkStatusRoom(req,res){
-    var userId = req.params.id;
-    var hotelId = req.params.hid;
-    var roomId = req.params.rid;
-    var params = req.body;
+function listNotAvailableRooms(req, res){
+    let userId = req.params.id;
+    let hotelId = req.params.hid;
 
 
-    Hotel.findById(hotelId).exec((err, hotelFind)=>{
-        if(err){
-            return res.status(500).send({message:'Error al buscar el hotel'});
-        }else if(hotelFind){
-            Room.findOne({_id: roomId, hotel: hotelId}).exec((err, roomFind)=>{
-                if(err){
-                    return res.status(500).send({message:'Error al buscar la haitacion'});
-                }else if(roomFind){
-                    Reservation.find({room: roomId}).exec((err, roomFind)=>{
-                        if(err){
-                            return res.status(500).send({message:'Error al buscar la haitacion'});
-                        }else if(roomFind){
-                            
-                        }else{
-                            return res.status(404).send({message:'No se ha encontrado la haitacion'});
-                        }
-                    })
-                }else{
-                    return res.status(404).send({message:'No se ha encontrado la haitacion'});
-                }
-            })
-        }else{
-            return res.status(404).send({message:'No se ha encontrado el hotel'});
-        }
-    })
+    if(userId != req.user.sub){
+        return res.status(500).send({message: 'No tienes permisos para realizar esta acción'});
+    }else{
+        var time = new Date().getTime();
+        var today = new Date('10/11/2021');
+        var yesterday = new Date(today-86400000);
+        var tomorrow = new Date(today+86400000);
+        Hotel.findById(hotelId).exec((err,hotelFind)=> {
+            if(err){
+                return res.status(500).send({message: 'Error general'});
+            }else if(hotelFind){
+                Reservation.find({checkIn: {$gte: yesterday}, checkOut: {$lte: tomorrow}}).exec((err,reservationFind)=> {
+                    if(err){
+                        return res.status(500).send({message: 'Error general'});
+                    }else if(reservationFind){
+                        var unique = reservationFind.map(reservationItem => reservationItem.room).filter((v,i,a)=> a.indexOf(v) === i)
+                        console.log(unique)
+                        Room.find({_id: {$in: unique}, hotel: hotelId}).exec((err,findRooms)=> {
+                            if(err){
+                                return res.status(500).send({message: 'Error general'});
+                            }else if(findRooms){
+                                return res.send({message: 'Habitaciones Disponidles', Habitaciones: findRooms});
+                            }else{
+                                return res.status(404).send({message:'No hay habitaciones reservadas'});
+                            }
+                        })
+                    }else{
+                        return res.status(404).send({message:'No hay habitaciones reservadas'});
+                    }
+                })
+            }else{
+                return res.status(404).send({message:'No hay habitaciones reservadas'});
+            }
+        })
+    }
 }
 
 function listReservationNoDisp(req, res){
@@ -186,35 +443,53 @@ function listReservationNoDisp(req, res){
 }
 
 function removeReservation(req, res){
-    let reservationId = req.params.id;
+    let userId = req.params.id;
+    let reservationId = req.params.idR;
     let params = req.body;
 
-    if(reservationId != req.room.sub){
+    if(userId != req.user.sub){
         return res.status(403).send({message: 'No tienes permiso para hacer esto'});
     }else{
-        Reservation.findOne({_id: reservationId}, (err, reservationFind)=>{
+        Reservation.findOne({_id: reservationId, user: userId}, (err, reservationFind)=>{
             if(err){
-                return res.status(500).send({message: 'Error general al eliminar'});
+                return res.status(500).send({message: 'Error general al buscar la reservacion'});
             }else if(reservationFind){
-                bcrypt.compare(params.password, reservationFind.password, (err, checkPassword)=>{
+                User.findOne({_id: userId}, (err, userFind) => {
                     if(err){
-                        return res.status(500).send({message: 'Error general al verificar contraseña'});
-                    }else if(checkPassword){
-                        Reservation.findByIdAndRemove(reservationId, (err, reservationRemoved)=>{
+                        return res.status(500).send({message:'Error al buscar usuario'});
+                    }else if(userFind){
+                        bcrypt.compare(params.password, userFind.password, (err, equalsPassword) => {
                             if(err){
-                                return res.status(500).send({message: 'Error general al eliminar'});
-                            }else if(reservationRemoved){
-                                return res.send({message: 'Se ha eliminado la reservación'});
+                                return res.status(500).send({message:'Error al comparar contraseñas'});
+                            }else if(equalsPassword){
+                                User.findOneAndUpdate({_id: userId, reservations: reservationId},
+                                    {$pull:{reservations: reservationFind._id}}, {new:true}, (err, servicePull)=>{
+                                        if(err){
+                                            return res.status(500).send({message: 'Error general al eliminar la reservacion del usuario'});
+                                        }else if(servicePull){
+                                            Reservation.findByIdAndRemove(reservationId, (err, reservationRemoved)=>{
+                                                if(err){
+                                                    return res.status(500).send({message: 'Error general al eliminar la reservacion'});
+                                                }else if(reservationRemoved){
+                                                    return res.send({message: 'Se ha eliminado la reservación'});
+                                                }else{
+                                                    return res.status(403).send({message: 'No se eliminó la reservación'});
+                                                }
+                                            })
+                                        }else{
+                                            return res.status(500).send({message: 'No se pudo eliminar la reservacion del usuario'});
+                                        }
+                                    })
                             }else{
-                                return res.status(403).send({message: 'No se eliminó la reservación'});
+                                return res.status(404).send({message:'No hay coincidencias en la password'});
                             }
                         })
                     }else{
-                        return res.status(403).send({message: 'No puedes eliminar reservaciones'});
+                        return res.status(404).send({message:'Tu password es incorrecta'});
                     }
-                })
+                }) 
             }else{
-                return res.status(403).send({message: 'La reservación no fue eliminada'});
+                return res.status(403).send({message: 'La reservación no fue encontrada'});
             } 
         })
     }
@@ -224,11 +499,11 @@ function findReservationBynameUser(req, res){
     var params = req.body;
 
     if(params.search){
-        User.find({$or:[{user: params.search}]}, (err, resultSearch)=>{
+        User.find({$or:[{name: params.search}]}, (err, resultSearch)=>{
             if(err){
                 return res.status(500).send({message: 'Error general'});
             }else if(resultSearch){
-                Reservation.find((err, reservationFind) => {
+                Reservation.find({_id: [resultSearch._id]},(err, reservationFind) => {
                     if(err){
                         return res.status(500).send({message:'Error al listar las reservaciones'});
                     }else if(reservationFind){
@@ -248,9 +523,10 @@ function findReservationBynameUser(req, res){
 
 module.exports = {
     createReservation,
-    checkStatusRoom,
+    updateReservation,
     listReservation,
-    listReservationDisp,
+    listAvailableRooms,
+    listNotAvailableRooms,
     listReservationNoDisp,
     removeReservation,
     findReservationBynameUser
