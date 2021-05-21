@@ -145,10 +145,10 @@ function updateService(req, res){
                 if(update.nameService){
                     update.nameService = update.nameService.toLowerCase();
         
-                    Service.findOne({nameService: update.nameService}, (err, serviceFind) => {
+                    Service.findOne({nameService: update.nameService, _id: {$in: hotelFind.services}}, (err, serviceFind) => {
                         if(err){
                             return res.status(500).send({message:'Error al buscar servicio'});
-                        }else if(serviceFind){
+                        }else if(serviceFind && serviceFind._id != serviceId){
                             return res.send({message: 'Servicio ya existente, crea uno nuevo o actualiza el que ya esta creado'})
                         }else{
                             Service.findByIdAndUpdate(serviceId, update, {new: true}, (err, serviceupdate) => {
