@@ -186,7 +186,7 @@ function updateService(req, res){
 function listService(req, res){
     var hotelId = req.params.hid;
 
-    Hotel.findById(hotelId).select("-_id -user -__v").exec((err, hotelFind)=>{
+    Hotel.findById(hotelId).populate('services').select("-_id -user -__v").exec((err, hotelFind)=>{
         if(err){
             return res.status(500).send({message: 'Error general al obtener el hotel'});
         }else if(hotelFind){
@@ -202,7 +202,7 @@ function listService(req, res){
         }else{
             return res.status(404).send({message:'No se encontraro el hotel'});
         }
-    });
+    })
 }
 
 function getService(req, res){
