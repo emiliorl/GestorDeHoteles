@@ -8,7 +8,8 @@ var reservationSchema = Schema({
     checkOut: Date,
     user: {type: Schema.ObjectId, ref: 'user'},
     room: {type: Schema.ObjectId, ref: 'room'},
-    serviceBefore: [{type: Schema.ObjectId, ref: 'service'}],
+    hotel: {type: Schema.ObjectId, ref: "hotel"},
+    services: [{type: Schema.ObjectId, ref: 'service'},{quantity: Number}],
 });
 
 module.exports = mongoose.model('reservation', reservationSchema);

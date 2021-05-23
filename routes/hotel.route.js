@@ -6,7 +6,7 @@ var mdAuth = require('../middleware/authenticated');
 
 var api = express.Router();
 
-api.post('/:id/createHotel', [mdAuth.ensureAuth, mdAuth.validRolAdminHotel], hotelController.createHotel);
+api.post('/:id/createHotel', [mdAuth.ensureAuth, mdAuth.validRolAdmin], hotelController.createHotel);
 api.put('/:id/updateHotel/:idH', [mdAuth.ensureAuth, mdAuth.validRolAdminHotel], hotelController.updateHotel);
 api.post('/:id/deleteHotel/:idH', [mdAuth.ensureAuth, mdAuth.validRolAdminHotel], hotelController.deleteHotel);
 api.get('/listHotels', hotelController.listHotels);
