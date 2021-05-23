@@ -20,5 +20,7 @@ api.post('/:id/:Rid/addService/:idS', mdAuth.ensureAuth, reservationController.a
 api.post('/:id/:Rid/removeService/:idS', mdAuth.ensureAuth, reservationController.removeService);
 api.post('/:id/mostRequestedHotel', [mdAuth.ensureAuth, mdAuth.validRolAdminOrAdminHotel], reservationController.mostRequestHotel);
 api.put('/:hid/createPDF', reservationController.createPDF);
+api.get('/:id/:idR/receipt', [mdAuth.ensureAuth], reservationController.receipt);
+api.get('/:id/:hid/hotelStatistics',[mdAuth.ensureAuth, mdAuth.validRolAdminHotel], reservationController.statisticsByHotel);
 
 module.exports = api;

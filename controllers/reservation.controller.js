@@ -96,7 +96,7 @@ function updateReservation(req,res){
                             return res.status(404).send({message:'No se encontra la reservacion'});
                         }else if(reservationFind.user == userId){
                             if(update.checkIn && update.checkOut && update.room){
-                                Room.find({_id:[update.room,reservationFind.room]}).exec((err, roomFindU) => {
+                                Room.find({_id:[update.room,reservationFind.room], hotel: reservationFind.hotel}).exec((err, roomFindU) => {
                                     if(err){
                                         return res.status(500).send({message:'Error general al intentar listar habitaciones'});
                                     }else if(roomFindU.length > 1){
@@ -156,7 +156,7 @@ function updateReservation(req,res){
                                     return res.send({message: 'Fechas no validas'});
                                 }
                             }else if(update.checkIn && update.room){
-                                Room.find({_id:[update.room,reservationFind.room]}).exec((err, roomFindU) => {
+                                Room.find({_id:[update.room,reservationFind.room], hotel: reservationFind.hotel}).exec((err, roomFindU) => {
                                     if(err){
                                         return res.status(500).send({message:'Error general al intentar listar habitaciones'});
                                     }else if(roomFindU.length > 1){
@@ -189,7 +189,7 @@ function updateReservation(req,res){
                                     }
                                 })
                             }else if(update.checkOut && update.room){
-                                Room.find({_id:[update.room,reservationFind.room]}).exec((err, roomFindU) => {
+                                Room.find({_id:[update.room,reservationFind.room], hotel: reservationFind.hotel}).exec((err, roomFindU) => {
                                     if(err){
                                         return res.status(500).send({message:'Error general al intentar listar habitaciones'});
                                     }else if(roomFindU.length > 1){
@@ -625,40 +625,140 @@ function mostRequestHotel(req, res){
 }
 
 function createPDF(req,res){
-    let hotelId = req.params.hid;
+    /* let hotelId = req.params.hid;
+    Reservation.find({}).populate("hotel").populate('user').exec((err, reservations)=>{
+        if(err){
+            return res.status(500).send({message: 'Error general en el servidor'})
+        }else if(reservations.length > 0){
+            var pdfName = reservations[0].hotel.nameHotel.replace(/[' ']/g, '_')+`_Reservations-${hotelId}.pdf`;
+            var reservationsInfo = []
+            reservations.map(reservation => {
+                var user = reservation.user
+                var hotel = reservation.hotel
+                reservationsInfo.push([user.name,user.lastname,user.phone,user.email,reservation.checkIn]);
+                if(reservation._id == reservations[reservations.length - 1]._id){
+                    const table0 = {
+                        headers: ['Name', 'Lastname', 'Phone', 'Email', 'CheckIn'],
+                        rows: reservationsInfo
+                    };
+                    doc.pipe(fs.createWriteStream(`./uploads/pdf/${pdfName}`))
+                    doc.text(hotel.name,{align: 'center'}).font('Helvetica')
+                    doc.moveDown(1);
+                    doc.table(table0, {
+                        prepareHeader: () => doc.font('Helvetica-Bold'),
+                        prepareRow: (row, ix) => doc.font('Helvetica').fontSize(12)
+                    });
+                    doc.end();
+                }
+            })
+            return res.send({message: 'PDF created'})
+        }else{
+            console.log(reservations)
+            return res.send({message: 'No hay reservaciones para realizar una estadistica'})
+        }
+    }) */
+}
 
-        Reservation.find({}).populate("hotel").populate('user').exec((err, reservations)=>{
+function receipt(req,res){
+    let userId = req.params.id;
+    let reservationId = req.params.idR;
+
+    if(userId != req.user.sub){
+        return res.status(400).send({message:'No posees permisos para hacer esta accion'});
+    }else{
+        Reservation.findById(reservationId).populate("hotel").populate('user').populate('services').populate('room').exec((err, reservationFind)=>{
             if(err){
-                return res.status(500).send({message: 'Error general en el servidor'})
-            }else if(reservations.length > 0){
-                var pdfName = reservations[0].hotel.nameHotel.replace(/[' ']/g, '_')+`_Reservations-${hotelId}.pdf`;
-                var reservationsInfo = []
-                reservations.map(reservation => {
-                    var user = reservation.user
-                    var hotel = reservation.hotel
-                    reservationsInfo.push([user.name,user.lastname,user.phone,user.email,reservation.checkIn]);
-                    if(reservation._id == reservations[reservations.length - 1]._id){
-                        const table0 = {
-                            headers: ['Name', 'Lastname', 'Phone', 'Email', 'CheckIn'],
-                            rows: reservationsInfo
-                        };
-                        doc.pipe(fs.createWriteStream(`./uploads/pdf/${pdfName}`))
-                        doc.text(hotel.name,{align: 'center'}).font('Helvetica')
-                        doc.moveDown(1);
-                        doc.table(table0, {
-                            prepareHeader: () => doc.font('Helvetica-Bold'),
-                            prepareRow: (row, ix) => doc.font('Helvetica').fontSize(12)
-                        });
-                        doc.end();
-                    }
-                })
+                return res.status(500).send({message: 'Error general al buscar la reservacion'})
+            }else if(reservationFind){
+                var pdfName = reservationFind.hotel.nameHotel.replace(/[' ']/g, '_')+`_Reservation-${reservationId}.pdf`;
+                
+                var user = reservationFind.user
+                var hotel = reservationFind.hotel
+                var room = reservationFind.room
+                var totalService = reservationFind.services.map(service => service.price).reduce((a,b) => a+b,0)
+                var reservationInfo = []
+                var servicesInfo = []
+                var days = (reservationFind.checkOut.getTime()-reservationFind.checkIn.getTime()) / (1000*3600*24);
+                reservationInfo.push([hotel.nameHotel,hotel.address,reservationFind.checkIn.toDateString(),reservationFind.checkOut.toDateString(),room.nameRoom,room.price]);
+                reservationFind.services.map(service => {
+                    servicesInfo.push([service._id,service.nameService,service.price]);
+                });
+                
+                const table0 = {
+                    headers: ['Hotel', 'Direccion', 'CheckIn', 'CheckOut', 'Room','Price per day'],
+                    rows: reservationInfo,
+                };
+                const table1 = {
+                    headers: ['ID','Service', 'Price'],
+                    rows: servicesInfo,
+                };
+                doc.pipe(fs.createWriteStream(`./uploads/pdf/receipts/${pdfName}`))
+                doc.text(`Reservation ID:${reservationFind._id}`,{align: 'center'}).font('Helvetica')
+                doc.moveDown(1);
+                doc.text(`Cliente: ${user.lastname}, ${user.name}`,{align: 'center'}).font('Helvetica')
+                doc.moveDown(3);
+                doc.table(table0, {
+                    prepareHeader: () => doc.font('Helvetica-Bold'),
+                    prepareRow: (row, ix) => doc.font('Helvetica').fontSize(12)
+                });
+                doc.moveDown(1);
+                doc.font('Helvetica-Bold').text(`Total for room: ${room.price*days}`,{align: 'right', fontWeight: 'bold'})
+                doc.moveDown(3);
+                doc.table(table1, {
+                    prepareHeader: () => doc.font('Helvetica-Bold'),
+                    prepareRow: (row, ix) => doc.font('Helvetica').fontSize(12)
+                });
+                doc.moveDown(1);
+                doc.font('Helvetica-Bold').text(`Total for services: ${totalService}`,{align: 'right'})
+                doc.moveDown(1);
+                doc.font('Helvetica-Bold').text(`Total: ${totalService+room.price*days}`,{align: 'right'})
+                doc.end();
                 return res.send({message: 'PDF created'})
             }else{
                 console.log(reservations)
-                return res.send({message: 'No hay reservaciones para realizar una estadistica'})
+                return res.send({message: 'No se ha encontrado la reservacion'})
             }
         })
     }
+}
+
+function statisticsByHotel(req, res){
+    var userId = req.params.id;
+    var hotelId = req.params.hid;
+
+    if(userId != req.user.sub){
+        return res.status(400).send({message:'No posees permisos para hacer esta accion'});
+    }else{
+        Hotel.findById(hotelId).sort({reservations: "desc"}).exec((err,hotelFind)=>{
+            if(err){
+                return res.status(400).send({message:'Error general al intentar buscar las reservaciones'});
+            }else if(hotelFind){
+                Reservation.find({hotel: hotelId}).sort({reservations: "desc"}).populate('hotel').exec((err,reservationFind)=>{
+                    if(err){
+                        return res.status(400).send({message:'Error general al intentar buscar las reservaciones'});
+                    }else if(reservationFind){
+                        Reservation.aggregate([{$match:{"hotel":reservationFind[0].hotel._id}},{$group: {_id:'$room', times: {$sum:1}}}]).sort({reservations: "desc"}).exec((err,mostReservedRoom)=>{
+                            if(err){
+                                return res.status(400).send({message:'Error general al intentar buscar las reservaciones'});
+                            }else if(mostReservedRoom){
+                                console.log(mostReservedRoom)
+                                return res.status(400).send({message: `Hotel: ${hotelFind.nameHotel}`,
+                                                                'Reservaciones': reservationFind.length,
+                                                                'Habitacion mas reservada': {Room:mostReservedRoom[0]._id, Cantidad: mostReservedRoom[0].times}});
+                            }else{
+                                return res.status(404).send({message:'No se ha encontrado las reservaciones'});
+                            }
+                        })   
+                    }else{
+                        return res.status(404).send({message:'No se ha encontrado las reservaciones'});
+                    }
+                })    
+            }else{
+                return res.status(404).send({message:'No se ha encontrado las reservaciones'});
+            }
+        })     
+    }
+}
 
 module.exports = {
     createReservation,
@@ -672,5 +772,7 @@ module.exports = {
     addService,
     removeService,
     mostRequestHotel,
-    createPDF
+    createPDF,
+    statisticsByHotel,
+    receipt
 }

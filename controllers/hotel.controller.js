@@ -14,32 +14,40 @@ function createHotel(req, res){
     if(req.user.sub != userId){
         return res.status(500).send({message: 'No tienes permiso para acceder a esta función.'});
     }else{
-        if(params.nameHotel && params.country && params.state && params.city && params.zipCode && params.address && params.phoneHotel){
+        if(params.nameHotel && params.country && params.state && params.city && params.zipCode && params.address && params.phoneHotel && params.hotelAdmin){
             Hotel.findOne({nameHotel : params.nameHotel}, (err, hotelFind)=>{
                 if(err){
                     return res.status(500).send({message: 'Error general al buscar el hotel'});
                 }else if(hotelFind){
                     return res.send({message: 'El nombre del hotel ingresado ya esta en uso'});
                 }else{
-                    let hotel = new Hotel();
-                    hotel.nameHotel = params.nameHotel;
-                    hotel.country = params.country;
-                    hotel.state = params.state;
-                    hotel.city = params.city;
-                    hotel.zipCode = params.zipCode;
-                    hotel.address = params.address;
-                    hotel.phoneHotel = params.phoneHotel;
-                    hotel.description = params.description;
-                    hotel.user = userId;
-                    hotel.save((err, hotelSaved)=>{
+                    User.findById(params.hotelAdmin).exec((err,userFind)=>{
                         if(err){
-                            return res.status(500).send({message: 'Error general al guardar el hotel'});
-                        }else if (hotelSaved){
-                            return res.send({message: 'El hotel fue guardado satisfactoriamente'});
+                            return res.status(500).send({message: 'Error general al buscar el administrador de hotel'});
+                        }else if(userFind.rol == "ADMIN_HOTEL"){
+                            let hotel = new Hotel();
+                            hotel.nameHotel = params.nameHotel;
+                            hotel.country = params.country;
+                            hotel.state = params.state;
+                            hotel.city = params.city;
+                            hotel.zipCode = params.zipCode;
+                            hotel.address = params.address;
+                            hotel.phoneHotel = params.phoneHotel;
+                            hotel.description = params.description;
+                            hotel.user = params.hotelAdmin;
+                            hotel.save((err, hotelSaved)=>{
+                                if(err){
+                                    return res.status(500).send({message: 'Error general al guardar el hotel'});
+                                }else if (hotelSaved){
+                                    return res.send({message: 'El hotel fue guardado satisfactoriamente'});
+                                }else{
+                                    return res.send({message: 'No se pudo agregar el hotel con exito'});
+                                }
+                            });
                         }else{
-                            return res.send({message: 'No se pudo agregar el hotel con exito'});
+                            return res.send({message: 'No se enccontro ningun usuario con los permisos'});
                         }
-                    });
+                    })
                 }
             });
         }else{
