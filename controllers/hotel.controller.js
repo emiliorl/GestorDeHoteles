@@ -35,7 +35,7 @@ function createHotel(req, res){
                         if(err){
                             return res.status(500).send({message: 'Error general al guardar el hotel'});
                         }else if (hotelSaved){
-                            return res.send({message: 'El hotel fue guardado satisfactoriamente'});
+                            return res.send({message: 'El hotel fue guardado satisfactoriamente', hotelSaved});
                         }else{
                             return res.send({message: 'No se pudo agregar el hotel con exito'});
                         }
