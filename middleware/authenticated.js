@@ -42,4 +42,17 @@ exports.validRolAdminHotel = (req, res, next) => {
     }else{
         next();
     }
+
 }
+
+exports.validRolAdminOrAdminHotel = (req, res, next) => {
+    var payload = req.user;
+
+    if(payload.rol == 'ADMIN'){
+        next();
+    }else if(payload.rol == 'ADMIN_HOTEL'){
+        next();
+    }else{
+        return res.status(401).send({message:'No tienes permiso para utilizar esta función'});
+    }
+}    
